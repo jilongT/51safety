@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消防知识大闯关 - 修正版</title>
+    <style>
+        /* 新增初始化样式 */
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #fff3e6;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transform: scale(0.95);
+            opacity: 0;
+            animation: popIn 0.5s forwards;
+        }
+
+        @keyframes popIn {
+            to { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option-btn {
+            background: #ffd9b3;
+            border: none;
+            padding: 12px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+
+        .score-panel {
+            text-align: center;
+            font-size: 24px;
+            color: #ff5500;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .progress {
+            height: 100%;
+            background: #ff5500;
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="score-panel">
+            当前得分：<span id="score">0</span> 分
+            <div class="progress-bar">
+                <div class="progress" style="width: 0%"></div>
+            </div>
+        </div>
+        <div id="questionArea"><!-- 题目将动态插入到这里 --></div>
+    </div>
+
+    <script>
+        // 修正后的题库数据
+        const questions = [
+            {
+                question: "油锅起火时，正确的做法是？",
+                options: [
+                    "用水浇灭", 
+                    "盖上锅盖", 
+                    "倒入大量食用油", 
+                    "用嘴吹灭"
+                ],
+                answer: 1  // 正确答案索引（从0开始）
+            },
+            {
+                question: "火灾逃生时为什么要弯腰前行？",
+                options: [
+                    "防止摔倒", 
+                    "避免被烟呛到", 
+                    "节省体力", 
+                    "方便寻找出口"
+                ],
+                answer: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let totalScore = 0;
+        const scorePerQuestion = 30;
+
+        // 初始化游戏（添加DOM加载监听）
+        document.addEventListener('DOMContentLoaded', function() {
+            // 打乱题目顺序
+            questions.sort(() => Math.random() - 0.5);
+            showQuestion();
+        });
+
+        // 显示题目（修正DOM操作）
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            const optionsHTML = q.options.map((opt, index) => `
+                <button class="option-btn" onclick="checkAnswer(${index})">
+                    ${String.fromCharCode(65 + index)}. ${opt}
+                </button>
+            `).join('');
+
+            const questionCard = `
+                <div class="question-card">
+                    <h3>第 ${currentQuestion + 1} 题：${q.question}</h3>
+                    <div class="options">${optionsHTML}</div>
+                </div>
+            `;
+
+            document.getElementById('questionArea').innerHTML = questionCard;
+
+            // 更新进度条
+            const progress = (currentQuestion / questions.length) * 100;
+            document.querySelector('.progress').style.width = `${progress}%`;
+        }
+
+        // 检查答案（添加全局声明）
+        window.checkAnswer = function(selectedIndex) {
+            const correctIndex = questions[currentQuestion].answer;
+            const options = document.querySelectorAll('.option-btn');
+            
+            options.forEach((btn, index) => {
+                btn.style.backgroundColor = index === correctIndex ? '#aaffaa' : 
+                                          selectedIndex === index ? '#ffaaaa' : '#ffd9b3';
+                btn.disabled = true;
+            });
+
+            if (selectedIndex === correctIndex) {
+                totalScore += scorePerQuestion;
+                document.getElementById('score').textContent = totalScore;
+            }
+
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < questions.length) {
+                    showQuestion();
+                } else {
+                    showFinalResult();
+                }
+            }, 1500);
+        }
+
+        // 显示最终结果
+        function showFinalResult() {
+            const resultHTML = `
+              
