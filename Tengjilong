@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>五一安全出行指南</title>
+    <style>
+        /* 基础样式 - 适配移动端 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', sans-serif; line-height: 1.6; background: #f5f5f5; }
+
+        /* 页面容器 */
+        .container { max-width: 750px; margin: 0 auto; padding: 20px; }
+
+        /* 横幅头图 */
+        .banner { width: 100%; border-radius: 10px; margin-bottom: 20px; }
+
+        /* 安全模块卡片 */
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .card h2 { color: #e74c3c; margin-bottom: 10px; }
+        .card ul { padding-left: 20px; }
+        .card li { margin-bottom: 8px; }
+
+        /* 底部提示 */
+        .footer { text-align: center; color: #666; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头图 -->
+        < img src="https://via.placeholder.com/750x300" alt="五一安全出行" class="banner">
+
+        <!-- 出行安全 -->
+        <div class="card">
+            <h2>📌 出行安全须知</h2>
+            <ul>
+                <li>检查车况：轮胎、刹车、油量</li>
+                <li>佩戴口罩，随身携带消毒湿巾</li>
+                <li>贵重物品随身携带，避免暴露</li>
+                <li>提前查询景区人流量，错峰出行</li>
+            </ul>
+        </div>
+
+        <!-- 防火安全 -->
+        <div class="card">
+            <h2>🔥 防火安全重点</h2>
+            <ul>
+                <li>离家前关闭燃气、断电</li>
+                <li>勿在楼道堆放易燃杂物</li>
+                <li>野炊后彻底熄灭明火</li>
+                <li>牢记火警电话：119</li>
+            </ul>
+        </div>
+
+        <!-- 底部声明 -->
+        <div class="footer">
+            <p>安全无小事，防范靠大家！</p >
+            <p>👇 长按转发提醒亲友 👇</p >
+        </div>
+    </div>
+
+    <!-- 微信分享配置（可选） -->
+    <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+    <script>
+        // 替换为你的微信公众号配置
+        wx.config({
+            debug: false,
+            appId: 'YOUR_APPID',
+            timestamp: 'TIMESTAMP',
+            nonceStr: 'NONCE_STR',
+            signature: 'SIGNATURE',
+            jsApiList: ['updateAppMessageShareData']
+        });
+
+        // 自定义分享内容
+        wx.ready(function() {
+            wx.updateAppMessageShareData({
+                title: '五一安全出行指南',
+                desc: '出行防火双保险，平安假期轻松享！',
+                link: window.location.href,
+                imgUrl: 'https://example.com/share-thumbnail.jpg'
+            });
+        });
+    </script>
+</body>
+</html>
