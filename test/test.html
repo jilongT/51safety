@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+		<title>手机端答题</title>
+	</head>
+
+	<body class="bg-gray-100 font-sans">
+		<div class="container mx-auto p-4">
+			<h1 class="text-2xl font-bold text-center mb-4">答题挑战</h1>
+			<p id="timer" class="text-center text-lg mb-4"></p>
+			<div id="question-container" class="bg-white p-6 rounded shadow mb-4">
+				<p id="question-text" class="text-lg mb-4"></p>
+				<ul id="answer-options" class="list-none p-0"></ul>
+			</div>
+			<button id="next-button" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" disabled>下一题</button>
+		</div>
+		<script>
+			const questions = [{
+					question: "世界上面积最大的海洋是？",
+					answers: [{
+							text: "太平洋",
+							correct: true
+						},
+						{
+							text: "大西洋",
+							correct: false
+						},
+						{
+							text: "印度洋",
+							correct: false
+						},
+						{
+							text: "北冰洋",
+							correct: false
+						}
+					]
+				},
+				{
+					question: "以下哪种动物属于哺乳动物？",
+					answers: [{
+							text: "鲨鱼",
+							correct: false
+						},
+						{
+							text: "鲸鱼",
+							correct: true
+						},
+						{
+							text: "鳄鱼",
+							correct: false
+						},
+						{
+							text: "企鹅",
+							correct: false
+						}
+					]
+				},
+				{
+					question: "世界上最长的河流是？",
+					answers: [{
+							text: "尼罗河",
+							correct: true
+						},
+						{
+							text: "亚马逊河",
+							correct: false
+						},
+						{
+							text: "长江",
+							correct: false
+						},
+						{
+							text: "密西西比河",
+							correct: false
+						}
+					]
+				},
+				{
+					question: "以下哪个是中国的四大名著之一？",
+					answers: [{
+							text: "《聊斋志异》",
+							correct: false
+						},
+						{
+							text: "《西游记》",
+							correct: true
+						},
+						{
+							text: "《封神演义》",
+							correct: false
+						},
+						{
+							text: "《隋唐演义》",
+							correct: false
+						}
+					]
+				},
+				{
+					question: "太阳系中体积最大的行星是？",
+					answers: [{
+							text: "木星",
+							correct: true
+						},
+						{
+							text: "土星",
+							correct: false
+						},
+						{
+							text: "天王星",
+							correct: false
+						},
+						{
+							text: "海王星",
+							correct: false
+						}
+					]
+				}
+			];
+
+			let currentQuestionIndex = 0;
+			let correctAnswers = 0;
+			const questionText = document.getElementById('question-text');
+			const answerOptions = document.getElementById('answer-options');
+			const nextButton = document.getElementById('next-button');
+			const timerElement = document.getElementById('timer');
+			let timer;
+			const timeLimit = 15; // 每题的答题时间限制（秒）
+
+			function showQuestion() {
+				const currentQuestion = questions[currentQuestionIndex];
+				questionText.textContent = currentQuestion.question;
+				answerOptions.innerHTML = '';
+				currentQuestion.answers.forEach(answer => {
+					const li = document.createElement('li');
+					const button = document.createElement('button');
+					button.textContent = answer.text;
+					button.classList.add('bg-gray-200', 'p-2', 'rounded', 'mb-2', 'w-full', 'text-left', 'hover:bg-gray-300');
+					button.addEventListener('click', () => selectAnswer(button, answer.correct));
+					li.appendChild(button);
+					answerOptions.appendChild(li);
+				});
+				nextButton.disabled = true;
+				startTimer();
+			}
+
+			function startTimer() {
+				let timeLeft = timeLimit;
+				timer = setInterval(() => {
+					timerElement.textContent = `剩余时间: ${timeLeft} 秒`;
+					if (timeLeft <= 0) {
+						clearInterval(timer);
+						// 时间到，自动选择第一个答案（视为答错）
+						const buttons = answerOptions.querySelectorAll('button');
+						if (buttons.length > 0) {
+							const firstAnswer = questions[currentQuestionIndex].answers[0];
+							selectAnswer(buttons[0], firstAnswer.correct);
+						}
+					} else {
+						timeLeft--;
+					}
+				}, 1000);
+			}
+
+			function selectAnswer(selectedButton, isCorrect) {
+				clearInterval(timer);
+				const buttons = answerOptions.querySelectorAll('button');
+				buttons.forEach(button => {
+					button.disabled = true;
+				});
+				if (isCorrect) {
+					selectedButton.classList.add('bg-green-500', 'text-white');
+					correctAnswers++;
+				} else {
+					selectedButton.classList.add('bg-red-500', 'text-white');
+					// 显示正确答案
+					const correctAnswerButton = Array.from(buttons).find(button => {
+						const answerText = button.textContent;
+						const currentQuestion = questions[currentQuestionIndex];
+						return currentQuestion.answers.find(ans => ans.text === answerText).correct;
+					});
+					if (correctAnswerButton) {
+						correctAnswerButton.classList.add('bg-green-500', 'text-white');
+					}
+				}
+				nextButton.disabled = false;
+			}
+
+			nextButton.addEventListener('click', () => {
+				currentQuestionIndex++;
+				if (currentQuestionIndex < questions.length) {
+					showQuestion();
+				} else {
+					let resultText = `答题结束！你答对了 ${correctAnswers} 道题。`;
+					if (correctAnswers > 4) {
+						resultText += ' 你获得了知识达人称号！';
+					}
+					questionText.textContent = resultText;
+					answerOptions.innerHTML = '';
+					nextButton.style.display = 'none';
+					timerElement.style.display = 'none';
+
+					// 添加返回主页面按钮
+					const backButton = document.createElement('button');
+					backButton.textContent = '返回主页面';
+					backButton.classList.add('bg-yellow-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-yellow-600', 'mt-4');
+					backButton.addEventListener('click', () => {
+						window.location.href = '../index.html' ;
+					});
+					const container = document.querySelector('.container');
+					container.appendChild(backButton);
+				}
+			});
+
+			showQuestion();
+		</script>
+	</body>
+
+</html>
