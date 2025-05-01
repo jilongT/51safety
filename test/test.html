@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+		<title>手机端答题</title>
+	</head>
+
+	<body class="bg-gray-100 font-sans">
+		<div class="container mx-auto p-4">
+			<h1 class="text-2xl font-bold text-center mb-4">答题挑战</h1>
+			<p id="timer" class="text-center text-lg mb-4"></p>
+			<div id="question-container" class="bg-white p-6 rounded shadow mb-4">
+				<p id="question-text" class="text-lg mb-4"></p>
+				<ul id="answer-options" class="list-none p-0"></ul>
+			</div>
+			<button id="next-button" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" disabled>下一题</button>
+		</div>
+		<script>
+			const questions = [{
+					question: "森林火灾扑救的基本原则是？",
+					answers: [{
+							text: "打早、打小、打了",
+							correct: true
+						},
+						{
+							text: "早发现、早出动、早扑灭",
+							correct: false
+						},
+						{
+							text: "小火当大火打",
+							correct: false
+						},
+						{
+							text: "消防员来了再灭火",
+							correct: false
+						}
+					]
+				},
+				{
+					question: "全国统一的森林火警电话是？",
+					answers: [{
+							text: "13119",
+							correct: false
+						},
+						{
+							text: "12119",
+							correct: true
+						},
+						{
+							text: "96119",
+							correct: false
+						},
+						{
+							text: "19119",
+							correct: false
+						}
+					]
+				},
+				{
+					question: "加强对____的管理，是防止发生森林火灾最有效的办法？",
+					answers: [{
+							text: "自然隐患",
+							correct: false
+						},
+						{
+							text: "进山人员",
+							correct: false
+						},
+						{
+							text: "人为火源",
+							correct: true
+						},
+						{
+							text: "车辆进出",
+							correct: false
+						}
+					]
+				},
+				{
+					question: "较大森林火灾受害面积是多少？",
+					answers: [{
+							text: "不足一公顷",
+							correct: false
+						},
+						{
+							text: "一公顷至一百公顷",
+							correct: true
+						},
+						{
+							text: "一百公顷至一千公顷",
+							correct: false
+						},
+						{
+							text: "一千公顷以上",
+							correct: false
+						}
+					]
+				},
+				{
+					question: "哪个不是燃烧三要素之一？",
+					answers: [{
+							text: "二氧化碳",
+							correct: true
+						},
+						{
+							text: "可燃物",
+							correct: false
+						},
+						{
+							text: "氧气",
+							correct: false
+						},
+						{
+							text: "温度",
+							correct: false
+						}
+					]
+				}
+			];
+
+			let currentQuestionIndex = 0;
+			let correctAnswers = 0;
+			const questionText = document.getElementById('question-text');
+			const answerOptions = document.getElementById('answer-options');
+			const nextButton = document.getElementById('next-button');
+			const timerElement = document.getElementById('timer');
+			let timer;
+			const timeLimit = 15; // 每题的答题时间限制（秒）
+
+			function showQuestion() {
+				const currentQuestion = questions[currentQuestionIndex];
+				questionText.textContent = currentQuestion.question;
+				answerOptions.innerHTML = '';
+				currentQuestion.answers.forEach(answer => {
+					const li = document.createElement('li');
+					const button = document.createElement('button');
+					button.textContent = answer.text;
+					button.classList.add('bg-gray-200', 'p-2', 'rounded', 'mb-2', 'w-full', 'text-left', 'hover:bg-gray-300');
+					button.addEventListener('click', () => selectAnswer(button, answer.correct));
+					li.appendChild(button);
+					answerOptions.appendChild(li);
+				});
+				nextButton.disabled = true;
+				startTimer();
+			}
+
+			function startTimer() {
+				let timeLeft = timeLimit;
+				timer = setInterval(() => {
+					timerElement.textContent = `剩余时间: ${timeLeft} 秒`;
+					if (timeLeft <= 0) {
+						clearInterval(timer);
+						// 时间到，自动选择第一个答案（视为答错）
+						const buttons = answerOptions.querySelectorAll('button');
+						if (buttons.length > 0) {
+							const firstAnswer = questions[currentQuestionIndex].answers[0];
+							selectAnswer(buttons[0], firstAnswer.correct);
+						}
+					} else {
+						timeLeft--;
+					}
+				}, 1000);
+			}
+
+			function selectAnswer(selectedButton, isCorrect) {
+				clearInterval(timer);
+				const buttons = answerOptions.querySelectorAll('button');
+				buttons.forEach(button => {
+					button.disabled = true;
+				});
+				if (isCorrect) {
+					selectedButton.classList.add('bg-green-500', 'text-white');
+					correctAnswers++;
+				} else {
+					selectedButton.classList.add('bg-red-500', 'text-white');
+					// 显示正确答案
+					const correctAnswerButton = Array.from(buttons).find(button => {
+						const answerText = button.textContent;
+						const currentQuestion = questions[currentQuestionIndex];
+						return currentQuestion.answers.find(ans => ans.text === answerText).correct;
+					});
+					if (correctAnswerButton) {
+						correctAnswerButton.classList.add('bg-green-500', 'text-white');
+					}
+				}
+				nextButton.disabled = false;
+			}
+
+			nextButton.addEventListener('click', () => {
+				currentQuestionIndex++;
+				if (currentQuestionIndex < questions.length) {
+					showQuestion();
+				} else {
+					let resultText = `答题结束！你答对了 ${correctAnswers} 道题。`;
+					if (correctAnswers > 4) {
+						resultText += ' 你获得了知识达人称号！';
+					}
+					questionText.textContent = resultText;
+					answerOptions.innerHTML = '';
+					nextButton.style.display = 'none';
+					timerElement.style.display = 'none';
+
+					// 添加返回主页面按钮
+					const backButton = document.createElement('button');
+					backButton.textContent = '返回主页面';
+					backButton.classList.add('bg-yellow-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-yellow-600', 'mt-4');
+					backButton.addEventListener('click', () => {
+						window.location.href = '../index.html' ;
+					});
+					const container = document.querySelector('.container');
+					container.appendChild(backButton);
+				}
+			});
+
+			showQuestion();
+		</script>
+	</body>
+
+</html>
